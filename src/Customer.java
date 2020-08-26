@@ -1,78 +1,105 @@
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.UUID;
 
-/** the Class make/rmove a customer add/delete them into/of
- * the db if impotant have a modify func to modify a existed
+/** the Class make/remove a customer add/delete them into/of
+ * the db if important have a modify func to modify a existed
  * Customer **/
 
 public class Customer {
 
-    private int id;
+    private String id;
     private String name;
     private String address;
-    private int tel;
+    private String tel;
 
+    public Customer() {   // make a virtual Customers for functions like Search and remove
+        System.out.println("virtual customer is ready");
+    }
 
-    public Customer (int id, String name, String address, int tel){
+    public Customer(String name, String address, String tel) {
         this.address = address;
         this.tel = tel;
         this.name = name;
-        this.id = id;
+        this.id = UUID.randomUUID().toString();
     }
 
-    /** add a Customer into the db
+    /**
+     * add a Customer into the db
      *
      * @return 0 if OK else -1
      */
-    public int add (){
-        return 0;
+    public void addtoDB() throws SQLException {
+        DB db = new DB();
+        String query = "INSERT INTO customers (id, name, address, tel) VALUE ('" + id + "','" + name + "','" + address + "'," + tel + ")";
+        db.make_connection();
+        if (db.update(query) == 1) {
+            System.out.println("Customer is successfully added");
+        }
+
+
     }
 
-    /** remove a Customer from db
-     *
-     * @return 0 if OK else -1
+    /**
+     * remove a Customer from db
      */
-    public int remove (){
-        return 0;
+    public void remove(String name) throws SQLException {
+        DB db = new DB();
+        String query = "DELETE FROM customers WHERE name='" + name + "';";
+        db.make_connection();
+        if (db.update(query) == 1) {
+            System.out.println("Customer is successfully removed");
+        }
     }
 
-    /** if a Customer need to modify */
-    public void modify(){
-
+    public ResultSet search(String name) throws SQLException {
+        DB db = new DB();
+        String query = "SELECT * FROM customers WHERE name='" + name + "';";
+        Statement stmt = db.make_connection();
+        ResultSet rs = stmt.executeQuery(query);
+        while (rs.next()) {
+            System.out.println("ID = " + rs.getString("id"));
+            System.out.println("NAME = " + rs.getString("name"));
+            System.out.println("ADDRESS = " + rs.getString("address"));
+            System.out.println("TEL = " + rs.getString("tel"));
+        }
+        return rs;
     }
 
-    /** getter an setter Functions */
-    public int getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public int getTel() {
-        return tel;
-    }
-
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public void setTel(int tel) {
-        this.tel = tel;
+    /**
+     * if a Customer need to modify
+     */
+    public void modify(String old_name, String new_name, String new_address, String new_tel) throws SQLException {
+        String id = null;
+        DB db = new DB();
+        String query = "SELECT * FROM customers WHERE name='" + old_name + "';";
+        Statement stmt = db.make_connection();
+        ResultSet rs = stmt.executeQuery(query);
+        while (rs.next()){
+            id = rs.getString("id");
+            System.out.println(id);
+        }
+        if (id == null){
+            System.out.println("Customer not found");
+        }
+        else {
+            query = "UPDATE customers " +
+                    "SET name='" + new_name + "'" +
+                    ", address='" + new_address + "'" + ", tel='" + new_tel +
+                    "' WHERE " +
+                    "id = '" + id + "';";
+            System.out.println(query);
+            if (db.update(query) == 1) {
+                System.out.println("Customer is successfully modified");
+            }
+        }
     }
 
 
+    public static void main(String[] args) throws SQLException {
+        Customer mahbod = new Customer();
+        mahbod.modify("ma", "mahbod", "berlin", "878743873");
+    }
 
 }
