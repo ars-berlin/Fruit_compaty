@@ -32,8 +32,12 @@ public class Customer {
      */
     public void addtoDB() throws SQLException {
         DB db = new DB();
+        String make_table = "CREATE TABLE IF NOT EXISTS baskets(id VARCHAR(50) primary key," +
+                            " name VARCHAR(50)," +
+                            " address VARCHAR(75)," +
+                            " tel VARCHAR(20));";
+        db.update(make_table);
         String query = "INSERT INTO customers (id, name, address, tel) VALUE ('" + id + "','" + name + "','" + address + "'," + tel + ")";
-        db.make_connection();
         if (db.update(query) == 1) {
             System.out.println("Customer is successfully added");
         }
@@ -47,13 +51,12 @@ public class Customer {
     public void remove(String name) throws SQLException {
         DB db = new DB();
         String query = "DELETE FROM customers WHERE name='" + name + "';";
-        db.make_connection();
         if (db.update(query) == 1) {
             System.out.println("Customer is successfully removed");
         }
     }
 
-    public ResultSet search(String name) throws SQLException {
+    public void search(String name) throws SQLException {
         DB db = new DB();
         String query = "SELECT * FROM customers WHERE name='" + name + "';";
         Statement stmt = db.make_connection();
@@ -64,7 +67,7 @@ public class Customer {
             System.out.println("ADDRESS = " + rs.getString("address"));
             System.out.println("TEL = " + rs.getString("tel"));
         }
-        return rs;
+        stmt.close();
     }
 
     /**
@@ -80,6 +83,7 @@ public class Customer {
             id = rs.getString("id");
             System.out.println(id);
         }
+        stmt.close();
         if (id == null){
             System.out.println("Customer not found");
         }
@@ -99,7 +103,7 @@ public class Customer {
 
     public static void main(String[] args) throws SQLException {
         Customer mahbod = new Customer();
-        mahbod.modify("ma", "mahbod", "berlin", "878743873");
+        mahbod.addtoDB();
     }
 
 }
